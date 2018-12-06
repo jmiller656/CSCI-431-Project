@@ -3,6 +3,7 @@ import random
 import numpy as np
 import os
 from skimage.color import rgb2gray, rgb2lab
+import cPickle as pickle
 
 train_set = []
 test_set = []
@@ -81,13 +82,24 @@ def get_batch(batch_size,original_size):
 	return x,y"""
 
 def get_train_set(size):
-    x = [rgb2gray(get_image(q,size)) for q in train_set]
-    y = [rgb2lab(get_image(q,size)) for q in train_set]
+    files = ["data/data_batch_1","data/data_batch_2","data/data_batch_3","data/data_batch_4"]
+    arrs = [pickle.load(open(x,'rb')) for x in files]
+    tmp = np.array([q['data'].reshape((-1,3,32,32)).transpose((0,2,3,1)) for q in arrs]).reshape((-1,32,32,3))
+    x = np.asarray([rgb2gray(q) for q in tmp])
+    y = [rgb2lab(q) for q in tmp]
+    y = np.asarray(y)
+    y =  (y + [0, 128, 128]) / [100.0, 255.0, 255.0]
+    #x = [rgb2gray(get_image(q,size)) for q in train_set]
+    #y = [rgb2lab(get_image(q,size)) for q in train_set]
     return x,y
 
 def get_test_set(size):
-    x = [rgb2gray(get_image(q,size)) for q in test_set]
-    y = [get_image(q,size) for q in test_set]
+    tmp = pickle.load(open("data/data_batch_5",'rb'))
+    tmp = tmp['data'].reshape((-1,3,32,32)).transpose((0,2,3,1))
+    x = [rgb2gray(q) for q in tmp]
+    y = [rgb2lab(q) for q in tmp]
+    y = np.asarray(y)
+    y =  (y + [0, 128, 128]) / [100.0, 255.0, 255.0]
     return x,y
 
 """
